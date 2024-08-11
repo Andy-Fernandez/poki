@@ -92,7 +92,7 @@ contract FoodOrder {
         emit OrderDelivered(customer);
     }
 
-    function status() public view returns (OrderStatus) {
+    function _status() public view returns (OrderStatus) {
         return status;
     }
 }

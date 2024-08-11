@@ -19,12 +19,12 @@ contract FoodOrder {
     event OrderDelivered(address indexed customer);
 
     modifier onlyCustomer() {
-        require(msg.sender == customer, "Solo el cliente puede ejecutar esta acción");
+        require(msg.sender == customer, "Solo el cliente puede ejecutar esta accion");
         _;
     }
 
     modifier onlyDeliveryPerson() {
-        require(msg.sender == deliveryPerson, "Solo el repartidor puede ejecutar esta acción");
+        require(msg.sender == deliveryPerson, "Solo el repartidor puede ejecutar esta accion");
         _;
     }
 
@@ -37,7 +37,7 @@ contract FoodOrder {
         require(bytes(_restaurantName).length > 0, "Nombre del restaurante es requerido");
         require(_dishes.length > 0, "Debe haber al menos un plato");
         require(_totalPrice > 0, "El precio total debe ser mayor a cero");
-        require(bytes(_deliveryAddress).length > 0, "La dirección de entrega es requerida");
+        require(bytes(_deliveryAddress).length > 0, "La direccion de entrega es requerida");
 
         customer = msg.sender;
         restaurantName = _restaurantName;
