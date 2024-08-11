@@ -6,7 +6,7 @@ contract SavingsDAO {
     uint public totalSavings;
     uint public savingsPercentage; // Porcentaje a retener por cada transacción
 
-    event SavingsDeposited(address indexed use r, uint amount);
+    event SavingsDeposited(address indexed user, uint amount);
     event SavingsWithdrawn(address indexed user, uint amount);
 
     constructor(uint _savingsPercentage) {
