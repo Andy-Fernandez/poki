@@ -5,7 +5,7 @@ async function main() {
 
     console.log("Desplegando el contrato GovernanceDAO con la cuenta:", deployer.address);
 
-    const savingsPercentage = 10; // Ajusta el porcentaje como desees
+    const savingsPercentage = 10; // se puede ajustar
     const GovernanceDAO = await hre.ethers.getContractFactory("GovernanceDAO");
     const governanceDAO = await GovernanceDAO.deploy(savingsPercentage);
     await governanceDAO.deployed();
