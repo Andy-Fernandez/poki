@@ -1,19 +1,15 @@
-//SPDX-License-Identifier: MIT
+/// SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
-
-// // Useful for debugging. Remove when deploying to a live network.
-// import "hardhat/console.sol";
 
 contract OrderManager {
     address public owner;
-    mapping(uint => FoodOrder) public orders;
     uint public orderCount;
+    mapping(uint => address) public orders;
 
-    event NewOrderCreated(address indexed customer, address orderAddress);
+    event NewOrderCreated(address indexed customer, address indexed orderAddress);
 
     constructor() {
         owner = msg.sender;
-        orderCount = 0;
     }
 
     function createOrder(
@@ -22,23 +18,28 @@ contract OrderManager {
         uint _totalPrice,
         string memory _deliveryAddress
     ) public {
-        FoodOrder newOrder = new FoodOrder(_restaurantName, _dishes, _totalPrice, _deliveryAddress);
-        orders[orderCount] = newOrder;
+        FoodOrder newOrder = new FoodOrder(
+            _restaurantName, _dishes, _totalPrice, _deliveryAddress
+        );
+        orders[orderCount] = address(newOrder);
         orderCount++;
 
         emit NewOrderCreated(msg.sender, address(newOrder));
     }
 
     function getOrderStatus(uint _orderId) public view returns (FoodOrder.OrderStatus) {
-        return orders[_orderId].status();
+        FoodOrder order = FoodOrder(orders[_orderId]);
+        return order.status();
     }
 
     function acceptOrder(uint _orderId, address _deliveryPerson) public {
-        orders[_orderId].acceptOrder(_deliveryPerson);
+        FoodOrder order = FoodOrder(orders[_orderId]);
+        order.acceptOrder(_deliveryPerson);
     }
 
     function markOrderAsDelivered(uint _orderId) public {
-        orders[_orderId].markAsDelivered();
+        FoodOrder order = FoodOrder(orders[_orderId]);
+        order.markAsDelivered();
     }
 }
 
@@ -64,7 +65,7 @@ contract FoodOrder {
         uint _totalPrice,
         string memory _deliveryAddress
     ) {
-        customer = msg.sender;  // La persona que genera el pedido
+        customer = msg.sender;
         restaurantName = _restaurantName;
         dishes = _dishes;
         totalPrice = _totalPrice;
@@ -75,7 +76,8 @@ contract FoodOrder {
     }
 
     function acceptOrder(address _deliveryPerson) public {
-        require(status == OrderStatus.Placed, "El pedido ya ha sido aceptado");
+        require(status == OrderStatus.Placed, "Order already accepted");
+        require(deliveryPerson == address(0), "Delivery person already assigned");
         deliveryPerson = _deliveryPerson;
         status = OrderStatus.Accepted;
 
@@ -83,9 +85,14 @@ contract FoodOrder {
     }
 
     function markAsDelivered() public {
-        require(msg.sender == deliveryPerson, "Solo el repartidor puede marcar como entregado");
+        require(msg.sender == deliveryPerson, "Only the delivery person can mark as delivered");
+        require(status == OrderStatus.Accepted, "Order not accepted yet");
         status = OrderStatus.Delivered;
 
         emit OrderDelivered(customer);
+    }
+
+    function status() public view returns (OrderStatus) {
+        return status;
     }
 }

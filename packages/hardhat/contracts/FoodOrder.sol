@@ -8,22 +8,38 @@ contract FoodOrder {
 
     string public restaurantName;
     string[] public dishes;
-    uint public totalPrice;
+    uint256 public totalPrice;
     string public deliveryAddress;
+    
     enum OrderStatus { Placed, Accepted, Prepared, Collected, Delivered }
     OrderStatus public status;
 
-    event OrderPlaced(address indexed customer, string[] dishes, uint totalPrice);
+    event OrderPlaced(address indexed customer, string[] dishes, uint256 totalPrice);
     event OrderAccepted(address indexed deliveryPerson);
     event OrderDelivered(address indexed customer);
+
+    modifier onlyCustomer() {
+        require(msg.sender == customer, "Solo el cliente puede ejecutar esta acción");
+        _;
+    }
+
+    modifier onlyDeliveryPerson() {
+        require(msg.sender == deliveryPerson, "Solo el repartidor puede ejecutar esta acción");
+        _;
+    }
 
     constructor(
         string memory _restaurantName,
         string[] memory _dishes,
-        uint _totalPrice,
+        uint256 _totalPrice,
         string memory _deliveryAddress
     ) {
-        customer = msg.sender;  // La persona que genera el pedido
+        require(bytes(_restaurantName).length > 0, "Nombre del restaurante es requerido");
+        require(_dishes.length > 0, "Debe haber al menos un plato");
+        require(_totalPrice > 0, "El precio total debe ser mayor a cero");
+        require(bytes(_deliveryAddress).length > 0, "La dirección de entrega es requerida");
+
+        customer = msg.sender;
         restaurantName = _restaurantName;
         dishes = _dishes;
         totalPrice = _totalPrice;
@@ -33,7 +49,7 @@ contract FoodOrder {
         emit OrderPlaced(customer, dishes, totalPrice);
     }
 
-    function acceptOrder(address _deliveryPerson) public {
+    function acceptOrder(address _deliveryPerson) public onlyCustomer {
         require(status == OrderStatus.Placed, "El pedido ya ha sido aceptado");
         deliveryPerson = _deliveryPerson;
         status = OrderStatus.Accepted;
@@ -41,8 +57,8 @@ contract FoodOrder {
         emit OrderAccepted(deliveryPerson);
     }
 
-    function markAsDelivered() public {
-        require(msg.sender == deliveryPerson, "Solo el repartidor puede marcar como entregado");
+    function markAsDelivered() public onlyDeliveryPerson {
+        require(status == OrderStatus.Accepted, "El pedido debe estar aceptado para ser entregado");
         status = OrderStatus.Delivered;
 
         emit OrderDelivered(customer);
