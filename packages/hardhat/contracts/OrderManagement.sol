@@ -42,7 +42,7 @@ contract OrderManagement {
         Order storage order = orders[_orderId];
         require(order.status == OrderStatus.Placed, "Order cannot be accepted");
         require(order.deliveryPerson == address(0), "Delivery person already assigned");
-        
+
         order.deliveryPerson = _deliveryPerson;
         order.status = OrderStatus.Accepted;
 
